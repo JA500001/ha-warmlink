@@ -1,0 +1,25 @@
+set_value:
+  name: Set WarmLink value
+  description: Write a WarmLink protocol parameter directly to the connected device.
+  fields:
+    entity_id:
+      name: WarmLink entity
+      description: Any entity belonging to the WarmLink device/config entry.
+      required: true
+      selector:
+        entity:
+          integration: warmlink
+    code:
+      name: Protocol code
+      description: WarmLink protocol code to write, for example H36 or compensate_slope.
+      required: true
+      example: compensate_slope
+      selector:
+        text:
+    value:
+      name: Value
+      description: Value to send to the WarmLink device.
+      required: true
+      example: "0.8"
+      selector:
+        text:
