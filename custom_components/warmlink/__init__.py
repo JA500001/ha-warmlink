@@ -60,14 +60,26 @@ async def async_setup(hass, config):
 
         result = await coord.api.set_value(device_code, code, value)
         LOGGER.info(
-            "WarmLink service set_value: %s=%s on device %s",
+            "WarmLink service set_value: %s=%s on device %s; response=%s",
             code,
             value,
             device_code,
+            result,
         )
 
-        # Refresh promptly so the corresponding sensor reflects the new value.
-        await coord.async_request_refresh()
+        # The WarmLink cloud can acknowledge a control request before the
+        # device has applied it. Existing writable entities therefore do NOT
+        # immediately poll after a write: an immediate refresh can read the
+        # old value back and make a successful write appear to have failed.
+        # Let the normal 120 s poll reconcile the value instead.
+        if (
+            not isinstance(result, dict)
+            or result.get("error_code") not in (None, "0")
+            or result.get("isReusltSuc") is False
+        ):
+            raise HomeAssistantError(
+                f"WarmLink rejected {code}={value}: {result}"
+            )
 
         return result
 
